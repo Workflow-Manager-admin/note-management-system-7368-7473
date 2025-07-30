@@ -1,49 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useContext } from "react";
+import "./App.css";
+import "./theme.css";
+import { ThemeProvider } from "./ThemeContext";
+import { AuthProvider, AuthContext } from "./AuthContext";
+import { NotesProvider } from "./NotesContext";
+import { LoginPage } from "./pages/LoginPage";
+import { NotesPage } from "./pages/NotesPage";
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * The main App component for NotesApp.
+ * Handles authentication, note context, and routing.
+ */
 function App() {
-  const [theme, setTheme] = useState('light');
+  // Consume auth context for login status
+  const { isAuthenticated, login } = useContext(AuthContext);
 
-  // Effect to apply theme to document element
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // PUBLIC_INTERFACE
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
-
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={login} />;
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <NotesProvider>
+      <NotesPage />
+    </NotesProvider>
   );
 }
 
-export default App;
+// PUBLIC_INTERFACE
+// Wrap with Theme and Auth providers. (Entry point for index.js)
+function AppWithProviders() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </ThemeProvider>
+  );
+}
+
+export default AppWithProviders;
